@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JE3 — ¿Cómo se eligen los beneficiarios?</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter','sans-serif'] },
+                    colors: {
+                        indigo: { '700':'#4338CA', '800':'#3730A3', '900':'#312E81' }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        body{ scroll-behavior:smooth; font-family:'Inter',sans-serif }
+        .nav-link.active{
+            background:#E0E7FF;
+            color:#312E81;
+            font-weight:600;
+        }
+        pre {
+            background: #111827;
+            color: #d1fae5;
+            padding: 1rem;
+            border-radius: .5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code.inline {
+            background: #e5e7eb;
+            color: #4338CA;
+            padding: .1rem .35rem;
+            border-radius: .35rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+<header class="bg-indigo-800 text-white p-6 shadow-lg rounded-b-lg">
+    <h1 class="text-3xl font-bold">Jóvenes a la E (JE3) — ¿Cómo se eligen los beneficiarios?</h1>
+    <p class="text-indigo-200 mt-1 text-lg">Explicado para público no técnico</p>
+</header>
+
+<div class="container mx-auto max-w-7xl mt-8">
+<div class="flex flex-col md:flex-row">
+
+<nav class="w-full md:w-1/4 p-4 md:sticky md:top-8 md:self-start md:h-[calc(100vh-4rem)] md:overflow-y-auto">
+    <h3 class="font-semibold text-gray-500 uppercase tracking-wide mb-3">Contenido</h3>
+    <ul class="space-y-2" id="nav-links">
+        <li><a href="#s1" class="nav-link block px-3 py-2 rounded-md">1. Visión general</a></li>
+        <li><a href="#s2" class="nav-link block px-3 py-2 rounded-md">2. Detalle del proceso</a></li>
+        <ul class="ml-4 space-y-1 text-sm">
+            <li><a href="#s2-1" class="nav-link block px-3 py-1 rounded-md">2.1 Datos de entrada</a></li>
+            <li><a href="#s2-2" class="nav-link block px-3 py-1 rounded-md">2.2 Habilitación A–I</a></li>
+            <li><a href="#s2-3" class="nav-link block px-3 py-1 rounded-md">2.3 Puntuación</a></li>
+            <li><a href="#s2-4" class="nav-link block px-3 py-1 rounded-md">2.4 Ordenamiento y desempates</a></li>
+            <li><a href="#s2-5" class="nav-link block px-3 py-1 rounded-md">2.5 Reglas IES</a></li>
+            <li><a href="#s2-6" class="nav-link block px-3 py-1 rounded-md">2.6 Asignación de cupos</a></li>
+            <li><a href="#s2-7" class="nav-link block px-3 py-1 rounded-md">2.7 Estados finales</a></li>
+            <li><a href="#s2-8" class="nav-link block px-3 py-1 rounded-md">2.8 Lista de espera</a></li>
+            <li><a href="#s2-9" class="nav-link block px-3 py-1 rounded-md">2.9 Puestos</a></li>
+        </ul>
+        <li><a href="#s3" class="nav-link block px-3 py-2 rounded-md">3. Flujo de ejecución</a></li>
+        <li><a href="#s4" class="nav-link block px-3 py-2 rounded-md">4. Snippets clave</a></li>
+        <li><a href="#s5" class="nav-link block px-3 py-2 rounded-md">5. Reglas mínimas por IES</a></li>
+        <li><a href="#s6" class="nav-link block px-3 py-2 rounded-md">6. Glosario</a></li>
+        <li><a href="#s7" class="nav-link block px-3 py-2 rounded-md">7. Preguntas frecuentes</a></li>
+        <li><a href="#s8" class="nav-link block px-3 py-2 rounded-md">8. Licencia y contacto</a></li>
+    </ul>
+</nav>
+
+<main class="w-full md:w-3/4 p-6 bg-white rounded-lg shadow-md space-y-12">
+
+<section id="s1" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">1) Visión general del proceso</h2>
+<ol class="list-decimal list-inside space-y-2 text-gray-700">
+<li><strong>Cargue de insumos:</strong> se abre el archivo con los datos de la convocatoria y la oferta educativa.</li>
+<li><strong>Habilitación:</strong> se verifica, <strong>regla por regla</strong>, si cada aspirante cumple requisitos mínimos (criterios <strong>A</strong> a <strong>I</strong>).</li>
+<li><strong>Puntuación:</strong> a quienes quedaron habilitados se les asigna un puntaje por <strong>vulnerabilidad estructural</strong>, <strong>vulnerabilidad económica</strong>, <strong>mérito académico</strong> y <strong>trayectorias</strong>.</li>
+<li><strong>Ordenamiento y desempates:</strong> se ordena a las personas por puntaje y, si hay empates, se aplican reglas de desempate y, en último caso, <strong>sorteo con semilla fija</strong> (reproducible).</li>
+<li><strong>Asignación de cupos por oferta:</strong> se recorre cada persona (en su orden), se miran sus opciones por <strong>prioridad</strong> y la existencia de cupos, con preferencia por la <strong>misma localidad</strong>.</li>
+<li><strong>Estados de elegibilidad:</strong> cada persona‑oferta queda como <strong>ELEGIBLE</strong>, <strong>LISTA_ESPERA</strong>, <strong>DISPONIBLE</strong>, <strong>INACTIVO</strong> o <strong>NO_ELEGIBLE</strong>, según corresponda.</li>
+<li><strong>Lista de espera:</strong> se calculan cupos para lista de espera y se repite una asignación controlada.</li>
+<li><strong>Puestos:</strong> se numera el <strong>puesto</strong> final dentro de cada programa/oferta.</li>
+</ol>
+<p class="mt-4 bg-indigo-50 p-4 rounded-lg text-indigo-800">Al final se obtiene, para cada aspirante y cada oferta a la que aplicó, un <strong>estado</strong> y, si aplica, su <strong>puesto</strong> y <strong>fuente de asignación</strong>.</p>
+</section>
+
+<section id="s2" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">2) Detalle del Proceso</h2>
+</section>
+
+<section id="s2-1" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.1 ─ Datos de entrada (lo mínimo que hay que saber)</h3>
+<p class="mb-3">Al cargar los insumos se obtienen 3 tablas principales:</p>
+<ul class="list-disc list-inside space-y-2">
+<li><code class="inline">BASE_OFERTA_FDL</code>: cupos por programa/oferta, tipo de oferta y fuente de financiación (incluye localidad, si aplica).</li>
+<li><code class="inline">JE3</code>: una fila por persona (base anonimizada) con resultados de cruces externos: educación previa, SISBÉN, pruebas Saber 11, etc.</li>
+<li><code class="inline">JE3_PER_OFERTA</code>: las <strong>opciones</strong> a las que se inscribió cada persona, con su <strong>prioridad</strong> (1, 2, 3…) y marcas como <strong>UAESP</strong> cuando aplica.</li>
+</ul>
+</section>
+
+<section id="s2-2" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.2 ─ Habilitación: requisitos A–I (secuencial)</h3>
+<p class="mb-4">La habilitación es <strong>secuencial</strong>: la primera regla que no se cumple <strong>inhabilita</strong> a la persona.</p>
+
+<h4 class="text-lg font-semibold text-indigo-700 mb-2">📌 Ejemplo de cálculo de edad</h4>
+<pre><code>JE3$CORTE_EDAD &lt;- as.integer(
+  age_calc(as.Date(JE3$FECHA_NACIMIENTO, "%Y-%m-%d"),
+           enddate = as.Date("2025-05-13"),
+           units = "years",
+           precise = TRUE)
+)</code></pre>
+<ul class="list-disc list-inside space-y-1 mb-4">
+<li>Se calcula la <strong>edad</strong> al <strong>13‑may‑2025</strong> (cierre de convocatoria).</li>
+<li>Se usa para el <strong>criterio C</strong> (máximo 28 años).</li>
+</ul>
+
+<ol class="list-decimal list-inside space-y-2">
+<li><strong>Criterio A — Bachiller de Bogotá o validación en Bogotá</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si <strong>no</strong> hay registro de grado ni Saber 11 → <strong>no habilitado</strong>.</li>
+<li>Si validó en Bogotá pero el puntaje es <strong>&lt; 30</strong> o no rindió en Bogotá → <strong>no habilitado</strong>.</li>
+<li>Si todo está en regla → <strong>HABILITADO_A</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio B — Presentó Saber 11/ICFES</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si no tiene periodo de Saber 11 → <strong>NO_HABILITADO</strong>.</li>
+<li>Si sí → <strong>HABILITADO_B</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio C — Edad ≤ 28 años</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Edad &gt; 28 → <strong>NO_HABILITADO</strong>; de lo contrario → <strong>HABILITADO_C</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio D — Situación TYT/SENA en el último año</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Se contemplan combinaciones de <strong>matrícula reciente TYT</strong> y si la persona <strong>se graduó</strong> o está en el <strong>SENA</strong>.</li>
+<li>Ciertas combinaciones inhabilitan (p.ej., <em>matriculado, no graduado, sin SENA</em>).</li>
+</ul>
+</li>
+
+<li><strong>Criterio E — No cursar carrera profesional en el último año</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si hay <strong>matrícula reciente</strong> en superior universitario → <strong>NO_HABILITADO</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio F — No ser egresado profesional</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si es <strong>graduado universitario</strong> (o con especialización universitaria) → <strong>NO_HABILITADO</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio G — Inscripción en SICORE</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li><strong>No aplica</strong> (todo el universo proviene de SICORE).</li>
+</ul>
+</li>
+
+<li><strong>Criterio H — No haber sido beneficiario previo / otros fondos</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si aparece como beneficiario previo de <strong>JU/UTC/fondos</strong> → <strong>NO_HABILITADO</strong>.</li>
+</ul>
+</li>
+
+<li><strong>Criterio I — Identidad (RNEC)</strong>
+<ul class="list-disc list-inside ml-6 space-y-1">
+<li>Si RNEC reporta inconsistencia → <strong>NO_HABILITADO</strong>.</li>
+</ul>
+</li>
+</ol>
+
+<h4 class="text-lg font-semibold text-indigo-700 mt-6 mb-2">Secuencia de Inhabilitación</h4>
+<pre><code>JE3 &lt;- sqldf("SELECT *,
+  CASE
+    WHEN HABILITADO_A != 'HABILITADO' THEN 'INHABILITA_REQUISITO_A'
+    WHEN HABILITADO_B != 'HABILITADO' THEN 'INHABILITA_REQUISITO_B'
+    WHEN HABILITADO_C != 'HABILITADO' THEN 'INHABILITA_REQUISITO_C'
+    WHEN HABILITADO_D != 'HABILITADO' THEN 'INHABILITA_REQUISITO_D'
+    WHEN HABILITADO_E != 'HABILITADO' THEN 'INHABILITA_REQUISITO_E'
+    WHEN HABILITADO_F != 'HABILITADO' THEN 'INHABILITA_REQUISITO_F'
+    WHEN HABILITADO_H != 'HABILITADO' THEN 'INHABILITA_REQUISITO_H'
+    WHEN HABILITADO_I != 'HABILITADO' THEN 'INHABILITA_REQUISITO_I'
+    ELSE 'HABILITADO' END AS HABILITADO
+  FROM JE3")</code></pre>
+<p>La <strong>primera</strong> regla que falla define el motivo de inhabilitación. Si ninguna falla → <strong>HABILITADO</strong>.</p>
+</section>
+
+<section id="s2-3" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.3 ─ Puntuación (para habilitados)</h3>
+<p class="mb-4">Se suman 4 criterios para obtener el <code class="inline">PUNTAJE_GLOBAL</code>.</p>
+
+<h4 class="font-semibold text-indigo-700">A. Vulnerabilidad estructural (hasta <strong>15 pts</strong>, <em>acumulable</em>)</h4>
+<ul class="list-disc list-inside mb-3">
+<li>Suma puntos por: ser mujer, ser madre/padre, identidad de género, pertenencia étnica, víctima, discapacidad, etc.</li>
+<li>Si la suma supera 15, se <strong>cap</strong> en <strong>15</strong>.</li>
+</ul>
+
+<h4 class="font-semibold text-indigo-700">B. Vulnerabilidad económica (<em>no acumulable</em>)</h4>
+<ul class="list-disc list-inside mb-3">
+<li>Con <strong>SISBÉN IV</strong>: A=40, B=30, C=20, otro=0.</li>
+<li><strong>Sin SISBÉN</strong>: se miran señales alternativas (colegio oficial rural, pertenencia indígena con reglas, egreso de oficial) y se asigna un solo bloque (40/30/15/0).</li>
+</ul>
+
+<h4 class="font-semibold text-indigo-700">C. Mérito académico (hasta <strong>40 pts</strong>)</h4>
+<ul class="list-disc list-inside mb-3">
+<li>Para <strong>&ge; 2016‑1</strong> se usa el <strong>percentil nacional</strong> del Saber 11 (100 → 40 pts; 95‑99 → 35; …).</li>
+<li>Para <strong>&lt; 2016‑1</strong> se usa el <strong>puesto</strong> (1‑10 → 40; 11‑50 → 35; …).</li>
+</ul>
+
+<h4 class="font-semibold text-indigo-700">D. Trayectorias (hasta <strong>5 pts</strong>, <em>no acumulable</em>)</h4>
+<ul class="list-disc list-inside mb-3">
+<li>Se otorgan <strong>5 pts</strong> si la persona participa en <strong>alguna</strong> trayectoria priorizada (UTC, Consejero de Juventud, IDRD, Parceros, etc.).</li>
+</ul>
+
+<h4 class="font-semibold text-indigo-700">E. Suma total</h4>
+<pre><code>JE3$PUNTAJE_GLOBAL &lt;-
+  JE3$CRITERIO_1_VUL_ESTRUCTURAL +
+  JE3$CRITERIO_2_VUL_ECONOMICA   +
+  JE3$CRITERIO_3_MERITO_ACADEMICO+
+  JE3$CRITERIO_4_TRAYECTORIA</code></pre>
+</section>
+
+<section id="s2-4" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.4 ─ Ordenamiento y desempates</h3>
+<ol class="list-decimal list-inside space-y-1">
+<li><strong>Orden principal:</strong> <code class="inline">PUNTAJE_GLOBAL</code> (desc).</li>
+<li><strong>Desempates sucesivos:</strong> puntaje global de Saber 11 (desc), puesto (asc), grupo/nivel SISBÉN (asc), vulnerabilidad estructural (desc), colegio oficial primero y <strong>sorteo aleatorio reproducible</strong>.</li>
+<li><strong>Semilla fija</strong> del sorteo: <code class="inline">20250513</code> (fecha de cierre).</li>
+</ol>
+<pre class="mt-3"><code>set.seed(20250513)
+JE3$SEMILLA &lt;- JE3$ID_PERSONA[sample(length(JE3$ID_PERSONA))]
+
+JE3 &lt;- sqldf("SELECT
+  ROW_NUMBER() OVER (ORDER BY
+    PUNTAJE_GLOBAL DESC,
+    SABER11_PUNTAJE_GLOBAL DESC,
+    SABER11_PUESTO ASC,
+    SISBEN4_Grupo ASC,
+    SISBEN4_Nivel ASC,
+    CRITERIO_1_VUL_ESTRUCTURAL DESC,
+    ORDENAMIENTO_D ASC,
+    SEMILLA ASC
+  ) AS JE3_LLAVE_PER, * FROM JE3")</code></pre>
+<p class="mt-2"><code class="inline">JE3_LLAVE_PER</code> es el <strong>orden final</strong> de las personas (llave de recorrido).</p>
+</section>
+
+<section id="s2-5" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.5 ─ Reglas específicas de IES/Programa (admisión mínima)</h3>
+<p class="mb-2">Para ciertos programas, hay <strong>mínimos de SABER 11</strong>. Ejemplo <strong>Universidad de los Andes</strong>:</p>
+<ul class="list-disc list-inside">
+<li>Ingenierías y Economía: <strong>&ge; 370</strong> puntos.</li>
+<li>Otros programas: <strong>&ge; 350</strong> puntos.</li>
+</ul>
+<p class="mt-2">Quien no cumple queda <strong>“2‑INHABILITA_CRITERIO_IES”</strong> en esa opción; lo demás sigue igual.</p>
+</section>
+
+<section id="s2-6" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.6 ─ Asignación de cupos (persona → opciones por prioridad)</h3>
+<p>Se hace un <strong>recorrido por persona</strong> (según <code class="inline">JE3_LLAVE_PER</code>). Para cada persona:</p>
+<ol class="list-decimal list-inside space-y-2">
+<li>Se toman sus <strong>opciones</strong> (<code class="inline">JE3_PER_OFERTA</code>) ordenadas por <code class="inline">PRIORIDAD</code>.</li>
+<li>Para cada opción se consulta la <strong>oferta</strong> (<code class="inline">BASE_OFERTA_FDL</code>) y los <strong>cupos disponibles</strong> (<code class="inline">CUPOS_CONTROL</code>).</li>
+<li><strong>Preferencia por localidad:</strong> si hay cupo en la <strong>misma localidad</strong> de la persona, se usa; si no, se evalúa la oferta <strong>sin localidad</strong>.</li>
+<li><strong>Si hay cupo:</strong>
+<ul class="list-disc list-inside ml-6">
+<li>Si la opción es <strong>UAESP + GENERAL</strong>, se asigna con esa marca.</li>
+<li>Si es <strong>GENERAL</strong> o <strong>RECOMPOSICIÓN</strong>, se asigna con la fuente correspondiente.</li>
+<li>Se <strong>descuenta</strong> el cupo en <code class="inline">CUPOS_CONTROL</code>.</li>
+<li>Se marca la opción elegida como <strong>ELEGIBLE</strong> y el resto de opciones de la persona como “‑” (no elegidas).</li>
+</ul>
+</li>
+<li>Si no hay cupo en esa prioridad, se intenta con la siguiente prioridad.</li>
+</ol>
+<p class="mt-2"><strong>Resultado por persona‑oferta</strong> (<code class="inline">JE3_PER_OFERTA</code>): <code class="inline">ELEGIBLE</code>, <code class="inline">ASIGNACION</code>, <code class="inline">N_REG_OFERTA</code> y <code class="inline">ESTADO_ELEGIBLE</code>.</p>
+</section>
+
+<section id="s2-7" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.7 ─ Estados finales de cada persona‑oferta</h3>
+<ul class="list-none space-y-1">
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-green-600">ELEGIBLE:</span> Recibió cupo en la asignación principal.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-blue-600">LISTA_ESPERA:</span> Recibió cupo de lista de espera.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-yellow-600">DISPONIBLE:</span> Habilitado, pero <strong>sin cupo</strong> en la pasada principal.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-gray-500">INACTIVO:</span> Opciones descendentes de alguien ya asignado en una anterior.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-red-600">NO_ELEGIBLE:</span> No cumple habilitación, reglas IES, o la <strong>prioridad &gt; 3</strong>.</li>
+</ul>
+<p class="mt-3">Además se crea un campo <strong><code class="inline">RESULTADO</code></strong> para TIC: <code class="inline">RESULTADO</code> = <strong>ELEGIBLE</strong> / <strong>LISTA_ESPERA</strong>; en otro caso → <strong>NO_ELEGIBLE</strong>.</p>
+</section>
+
+<section id="s2-8" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.8 ─ Lista de espera (cálculo y asignación)</h3>
+<ol class="list-decimal list-inside space-y-2">
+<li>Se parte de los <strong>DISPONIBLES</strong> tras la primera asignación.</li>
+<li>Se definen <strong>cupos de lista de espera</strong> (<code class="inline">CUPOS_ASIGNADOS_LP</code>):
+<ul class="list-disc list-inside ml-6">
+<li>Si la oferta tiene <strong>&le; 3</strong> cupos, la lista de espera es el <strong>doble</strong>.</li>
+<li>Si es <strong>&gt; 3</strong>, la lista de espera es <strong>igual</strong> a los cupos.</li>
+</ul>
+</li>
+<li>Se repite un <strong>recorrido similar</strong> al de la asignación principal.</li>
+<li>El estado resultante en estas asignaciones pasa a <strong>LISTA_ESPERA</strong>.</li>
+</ol>
+</section>
+
+<section id="s2-9" class="scroll-mt-20">
+<h3 class="text-2xl font-semibold text-indigo-800 mb-2">2.9 ─ Puestos dentro de cada programa/oferta</h3>
+<p>Consolida <strong>ELEGIBLES</strong>, <strong>LISTA_ESPERA</strong> y <strong>DISPONIBLES</strong> y asigna <code class="inline">PUESTO</code> por programa/oferta:</p>
+<ul class="list-disc list-inside">
+<li>Se priorizan: (1) ELEGIBLES, (2) LISTA_ESPERA, (3) resto.</li>
+<li>Luego el orden dentro de cada bloque usa <code class="inline">JE3_LLAVE_PER</code> (el orden global).</li>
+</ul>
+</section>
+
+<section id="s3" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">3) Flujo de ejecución (resumen técnico y “por dónde pasa”)</h2>
+<div class="w-full">
+    <img src="image-1.png" alt="Flujo JE3" class="mx-auto">
+</div>
+</section>
+
+<section id="s4" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">4) Snippets clave (con explicación paso a paso)</h2>
+
+<h3 class="text-xl font-semibold text-indigo-800 mb-2">4.1 Semilla y desempates reproducibles</h3>
+<pre><code>set.seed(20250513)                
+JE3$SEMILLA &lt;- JE3$ID_PERSONA[        
+  sample(length(JE3$ID_PERSONA))
+]</code></pre>
+<p>Este “sorteo” <strong>solo se usa</strong> si persisten empates tras aplicar todas las reglas.</p>
+<ul class="list-disc list-inside">
+<li><code class="inline">set.seed()</code> fija la semilla (fecha de cierre) para que el sorteo sea replicable.</li>
+<li>Luego hay un vector de “sorteo” que reordena los IDs para romper empates al final.</li>
+</ul>
+
+<h3 class="text-xl font-semibold text-indigo-800 mb-2 mt-6">4.2 Preferencia por localidad (elección de registro de oferta)</h3>
+<p>Pseudocódigo equivalente a lo que hace el script en R:</p>
+<pre><code>1) Filtra la oferta con CUPOS_CONTROL &gt; 0
+2) Si la persona tiene localidad:
+   2a) busca un registro de oferta en esa misma localidad
+   2b) si existe, usa el de menor N_REG_OFERTA
+   2c) si no existe, usa el registro “sin localidad” de menor N_REG_OFERTA
+3) Si la persona no tiene localidad: usa el registro “sin localidad” de menor N_REG_OFERTA</code></pre>
+<p><code class="inline">N_REG_OFERTA</code> funciona como <strong>desempatador</strong> interno dentro de una misma oferta.</p>
+</section>
+
+<section id="s5" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">5) Reglas mínimas de admisión por IES (ej. Uniandes)</h2>
+<pre><code># Ingenierías y Economía (&gt;= 370)
+TMP_ELEGIBLE[
+  TMP_ELEGIBLE$CODIGO_SNIES_IES==1813 &amp;
+  TMP_ELEGIBLE$CODIGO_SNIES_PROGRAMA %in% c(91142,1539,1541,4690,1535) &amp;
+  !is.na(TMP_ELEGIBLE$SABER11_PUNTAJE_GLOBAL) &amp;
+  TMP_ELEGIBLE$SABER11_PUNTAJE_GLOBAL &gt;= 370,
+  "HABILITADO_IES"
+] &lt;- "1-HABILITADO"
+
+# Otros (&gt;= 350); lo demás: "2-INHABILITA_CRITERIO_IES"</code></pre>
+<p>Si no cumple el puntaje mínimo de admisión de la IES <strong>para ese programa</strong>, esa opción queda <strong>inhabilitada</strong>, pero <strong>otras opciones</strong> del aspirante siguen vigentes.</p>
+</section>
+
+<section id="s6" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">6) Glosario</h2>
+<ul class="list-disc list-inside space-y-1">
+<li><strong>Habilitado:</strong> cumple requisitos mínimos A–I.</li>
+<li><strong>Puntaje global:</strong> suma de 4 criterios (máx. 100).</li>
+<li><strong>Prioridad:</strong> orden de preferencias declarado por el aspirante (1 es la más alta).</li>
+<li><strong>UAESP:</strong> marca especial que, con oferta <strong>GENERAL</strong>, puede activar una asignación directa.</li>
+<li><strong>Fuente:</strong> origen del cupo (GENERAL, RECOMPOSICIÓN, etc.).</li>
+<li><strong>Lista de espera:</strong> cupos adicionales para cubrir desistimientos/no matriculados.</li>
+<li><strong>Puesto:</strong> orden final del aspirante dentro del programa/oferta.</li>
+</ul>
+</section>
+
+<section id="s7" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">7) Preguntas frecuentes (FAQ)</h2>
+
+<h4 class="font-semibold text-indigo-800">¿Quién decide en un empate total?</h4>
+<p>El sistema usa una <strong>semilla fija</strong> para un sorteo final, por lo que el resultado es <strong>reproducible</strong>.</p>
+
+<h4 class="font-semibold text-indigo-800 mt-4">¿Qué pasa si no hay cupo en mi prioridad 1?</h4>
+<p>El algoritmo intenta con tu <strong>prioridad 2</strong> (y así sucesivamente), respetando la preferencia por <strong>localidad</strong> cuando existe.</p>
+
+<h4 class="font-semibold text-indigo-800 mt-4">¿Puedo quedar no habilitado para una IES y seguir compitiendo por otra?</h4>
+<p><strong>Sí.</strong> Las <strong>reglas de IES</strong> aplican <strong>por programa</strong>. Puedes no cumplir en uno y, sin embargo, <strong>sí</strong> cumplir en otro.</p>
+
+<h4 class="font-semibold text-indigo-800 mt-4">¿La lista de espera es igual en todos los casos?</h4>
+<p><strong>No.</strong> Si una oferta tiene <strong>&le; 3</strong> cupos, la lista de espera es el <strong>doble</strong>. Si tiene <strong>&gt; 3</strong>, la lista de espera es <strong>igual</strong>.</p>
+</section>
+
+<section id="s8" class="scroll-mt-20">
+<h2 class="text-3xl font-bold text-indigo-900 mb-4 border-b border-indigo-100 pb-2">8) Licencia y contacto</h2>
+<p>Este material explica a alto nivel el proceso de selección en JE3 – Bogotá, con base en el script operativo en R. Para consultas remitirse a <a class="text-indigo-700 underline" href="https://www.agenciaatenea.gov.co/atencion-y-servicios-la-ciudadania" target="_blank" rel="noopener">Agencia Atenea</a>.</p>
+</section>
+
+</main>
+</div>
+</div>
+
+<footer class="text-center p-6 mt-12 bg-gray-100 text-gray-500 text-sm">
+    Documentación explicativa de JE3 – Bogotá
+</footer>
+
+<script>
+document.addEventListener("scroll", ()=>{
+    const links=document.querySelectorAll(".nav-link");
+    const scrollY=window.scrollY;
+    links.forEach(link=>{
+        const section=document.querySelector(link.getAttribute("href"));
+        if(section){
+            const top=section.offsetTop-120;
+            const bottom=top+section.offsetHeight;
+            link.classList.remove("active");
+            if(scrollY>=top && scrollY<bottom){
+                link.classList.add("active");
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
