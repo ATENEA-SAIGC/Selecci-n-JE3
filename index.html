@@ -86,7 +86,7 @@
 <ol class="list-decimal list-inside space-y-2 text-gray-700">
 <li><strong>Cargue de insumos:</strong> se abre el archivo con los datos de la convocatoria y la oferta educativa.</li>
 <li><strong>Habilitación:</strong> se verifica, <strong>regla por regla</strong>, si cada aspirante cumple requisitos mínimos (criterios <strong>A</strong> a <strong>I</strong>).</li>
-<li><strong>Puntuación:</strong> a quienes quedaron habilitados se les asigna un puntaje por <strong>vulnerabilidad estructural</strong>, <strong>vulnerabilidad económica</strong>, <strong>mérito académico</strong> y <strong>trayectorias</strong>.</li>
+<li><strong>Puntuación:</strong> Se realiza el calculo del puntaje sobre el universo completo de inscritos.</li>
 <li><strong>Ordenamiento y desempates:</strong> se ordena a las personas por puntaje y, si hay empates, se aplican reglas de desempate y, en último caso, <strong>sorteo con semilla fija</strong> (reproducible).</li>
 <li><strong>Asignación de cupos por oferta:</strong> se recorre cada persona (en su orden), se miran sus opciones por <strong>prioridad</strong> y la existencia de cupos, con preferencia por la <strong>misma localidad</strong>.</li>
 <li><strong>Estados de elegibilidad:</strong> cada persona‑oferta queda como <strong>ELEGIBLE</strong>, <strong>LISTA_ESPERA</strong>, <strong>DISPONIBLE</strong>, <strong>INACTIVO</strong> o <strong>NO_ELEGIBLE</strong>, según corresponda.</li>
@@ -208,7 +208,7 @@
 
 <h4 class="font-semibold text-indigo-700">A. Vulnerabilidad estructural (hasta <strong>15 pts</strong>, <em>acumulable</em>)</h4>
 <ul class="list-disc list-inside mb-3">
-<li>Suma puntos por: ser mujer, ser madre/padre, identidad de género, pertenencia étnica, víctima, discapacidad, etc.</li>
+<li>Suma puntos por: ser mujer, ser madre, identidad de género, pertenencia étnica, víctima, discapacidad, etc.</li>
 <li>Si la suma supera 15, se <strong>cap</strong> en <strong>15</strong>.</li>
 </ul>
 
@@ -283,7 +283,7 @@ JE3 &lt;- sqldf("SELECT
 <li>Si la opción es <strong>UAESP + GENERAL</strong>, se asigna con esa marca.</li>
 <li>Si es <strong>GENERAL</strong> o <strong>RECOMPOSICIÓN</strong>, se asigna con la fuente correspondiente.</li>
 <li>Se <strong>descuenta</strong> el cupo en <code class="inline">CUPOS_CONTROL</code>.</li>
-<li>Se marca la opción elegida como <strong>ELEGIBLE</strong> y el resto de opciones de la persona como “‑” (no elegidas).</li>
+<li>Se marca la opción elegida como <strong>ELEGIBLE</strong> y el resto de opciones de la persona como <strong>INACTIVAS</strong>.</li>
 </ul>
 </li>
 <li>Si no hay cupo en esa prioridad, se intenta con la siguiente prioridad.</li>
@@ -296,8 +296,8 @@ JE3 &lt;- sqldf("SELECT
 <ul class="list-none space-y-1">
 <li><span class="font-semibold inline-block w-36 text-right mr-2 text-green-600">ELEGIBLE:</span> Recibió cupo en la asignación principal.</li>
 <li><span class="font-semibold inline-block w-36 text-right mr-2 text-blue-600">LISTA_ESPERA:</span> Recibió cupo de lista de espera.</li>
-<li><span class="font-semibold inline-block w-36 text-right mr-2 text-yellow-600">DISPONIBLE:</span> Habilitado, pero <strong>sin cupo</strong> en la pasada principal.</li>
-<li><span class="font-semibold inline-block w-36 text-right mr-2 text-gray-500">INACTIVO:</span> Opciones descendentes de alguien ya asignado en una anterior.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-yellow-600">DISPONIBLE:</span> Habilitado, posterior a elegibles y listas de espera.</li>
+<li><span class="font-semibold inline-block w-36 text-right mr-2 text-gray-500">INACTIVO:</span> Las otras opciones de un inscrito que previamente fue asignado a Elegible o lista de espera.</li>
 <li><span class="font-semibold inline-block w-36 text-right mr-2 text-red-600">NO_ELEGIBLE:</span> No cumple habilitación, reglas IES, o la <strong>prioridad &gt; 3</strong>.</li>
 </ul>
 <p class="mt-3">Además se crea un campo <strong><code class="inline">RESULTADO</code></strong> para TIC: <code class="inline">RESULTADO</code> = <strong>ELEGIBLE</strong> / <strong>LISTA_ESPERA</strong>; en otro caso → <strong>NO_ELEGIBLE</strong>.</p>
